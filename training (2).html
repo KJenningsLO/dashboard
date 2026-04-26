@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kelly Jennings — Training Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --panel: #ffffff;
+    --border: #e2e8f0;
+    --accent: #b8922a;
+    --accent-bright: #d4a843;
+    --accent-bg: rgba(184,146,42,0.07);
+    --accent-border: rgba(184,146,42,0.25);
+    --text: #1a202c;
+    --muted: #64748b;
+    --dim: #cbd5e1;
+    --success: #16a34a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: "Inter", sans-serif; min-height: 100vh; }
+
+  /* HEADER */
+  .header { background: #fff; border-top: 3px solid var(--accent); border-bottom: 1px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .header-title { font-family: "DM Serif Display", serif; font-size: 22px; color: var(--text); }
+  .header-sub { font-size: 10px; color: var(--accent); font-family: "JetBrains Mono", monospace; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; margin-top: 2px; }
+  .back-btn { background: var(--accent); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-family: "Inter", sans-serif; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s; }
+  .back-btn:hover { background: var(--accent-bright); }
+
+  /* PROGRESS BAR */
+  .global-progress { background: #fff; border-bottom: 1px solid var(--border); padding: 12px 32px; display: flex; align-items: center; gap: 16px; }
+  .gp-label { font-size: 11px; font-family: "JetBrains Mono", monospace; color: var(--muted); letter-spacing: 0.08em; white-space: nowrap; }
+  .gp-bar { flex: 1; height: 6px; background: var(--dim); border-radius: 99px; overflow: hidden; }
+  .gp-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-bright)); border-radius: 99px; transition: width 0.4s ease; }
+  .gp-pct { font-size: 12px; font-family: "JetBrains Mono", monospace; color: var(--accent); font-weight: 600; white-space: nowrap; }
+
+  /* MAIN */
+  .main { max-width: 1400px; margin: 0 auto; padding: 28px 32px; }
+
+  /* COACH SECTION */
+  .coach-section { margin-bottom: 36px; }
+  .coach-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--accent-border); }
+  .coach-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-bright)); display: flex; align-items: center; justify-content: center; font-family: "DM Serif Display", serif; font-size: 16px; color: #fff; flex-shrink: 0; }
+  .coach-name { font-family: "DM Serif Display", serif; font-size: 20px; color: var(--text); }
+  .coach-count { font-size: 10px; font-family: "JetBrains Mono", monospace; color: var(--muted); letter-spacing: 0.1em; background: var(--bg); border: 1px solid var(--border); padding: 3px 10px; border-radius: 99px; }
+  .coach-progress { font-size: 10px; font-family: "JetBrains Mono", monospace; color: var(--accent); font-weight: 600; letter-spacing: 0.08em; margin-left: auto; }
+
+  /* GRID */
+  .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+  .course-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer; transition: all 0.15s; }
+  .course-card:hover { border-color: var(--accent-border); background: var(--accent-bg); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(184,146,42,0.1); }
+  .course-card.completed { opacity: 0.55; background: #f8fdf9; border-color: #bbf7d0; }
+  .course-card.completed .course-title { text-decoration: line-through; color: var(--muted); }
+  .course-check { width: 18px; height: 18px; border-radius: 5px; border: 2px solid var(--dim); background: transparent; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .course-card.completed .course-check { background: var(--success); border-color: var(--success); }
+  .course-check-mark { color: #fff; font-size: 10px; font-weight: 900; display: none; }
+  .course-card.completed .course-check-mark { display: block; }
+  .course-title { font-size: 12px; font-family: "Inter", sans-serif; color: var(--text); line-height: 1.45; font-weight: 500; }
+
+  /* GUEST SECTION LABEL */
+  .guest-label { font-size: 9px; font-family: "JetBrains Mono", monospace; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; margin-top: 16px; padding-left: 2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div>
+      <div class="header-title">Training Center</div>
+      <div class="header-sub">Kelly Jennings · TLOP Courses</div>
+    </div>
+  </div>
+  <a href="javascript:history.back()" class="back-btn">← Back to Dashboard</a>
+</div>
+
+<div class="global-progress">
+  <span class="gp-label">OVERALL PROGRESS</span>
+  <div class="gp-bar"><div class="gp-fill" id="gp-fill" style="width:0%"></div></div>
+  <span class="gp-pct" id="gp-pct">0 / 0 completed</span>
+</div>
+
+<div class="main" id="training-main"></div>
+
+<script>
+const COACHES = [
+  {
+    id: "bk",
+    name: "Coach Brian Kimball",
+    initials: "BK",
+    courses: [
+      "Building Relationships w/ Realtors Outside of Your Primary Market",
+      "Why and How to Track your Metrics and Results",
+      "Coach BK's Content Creation Process",
+      "Turning Relationships with Past Clients into Referrals",
+      "Coach BK's Process for Getting Reviews from Clients",
+      "Coach BK's Google & Zillow Reviews | Setup Process",
+      "Structuring Your Day for Success",
+      "Coach BK's New Lead \"Playbook\"",
+      "Targeting Listing Agents Throughout the Closing Process",
+      "Coach BK's 3 Pillars of Business for a Successful 2025",
+      "Top Producer Panel Discussion (Brian & Gwen)",
+      "Leading By Design: Developing a Team That Shares Your Vision",
+      "Leveraging Your Business to Create the Life You Truly Want",
+      "Cultivating Connections: A Sales & Marketing Framework for Referral-Based Lending",
+      "The Loan Officer's Efficiency Blueprint",
+      "From Chaos To Control: Creating Standardized Workflows That Work",
+      "From a Mile Wide to a Mile Deep",
+      "From Chaos to Control: Mastering Your Calendar, Mastering Your Life",
+      "Problem-Solve Like a Pro",
+      "The Growth Fishhook: Taking your Business to the Next Level",
+      "Taking Life to the Next Level",
+      "The Relationship Building Loan Application",
+      "From Daily Tasks to Big Wins",
+      "The \"First Meeting Framework\" That Actually Converts",
+      "Creating a Referral Machine w/ Coach BK",
+      "Leveraging AI for Prospecting",
+      "The Organized LO: Systems That Close More Loans"
+    ]
+  },
+  {
+    id: "gs",
+    name: "Coach Gwen Swain",
+    initials: "GS",
+    courses: [
+      "How to Leverage FB Algorithms",
+      "Leveraging Facebook Groups for Realtor Follow Up",
+      "Open Facebook Profile Audits",
+      "Preparing For Another Market Shift",
+      "Using Visualization & Intentionality to Build Your Realtor Referral Network",
+      "Brand-Audits with Coach Gwen",
+      "Transformational Listening",
+      "The Gap & The Gain - Mindset Hacks (when your pipeline runs dry)",
+      "Coach Gwen's \"Fisher-Price-Easy\" Refi Guide",
+      "Marketing & Realtor Relationships (Open Q&A)",
+      "Coach Gwen's 2025 Business Plan",
+      "Top Producer Panel Discussion (Gwen & Brian)",
+      "Creating The Perfect File Flow for Any Sized Team",
+      "Building an Effective Agenda for Your Team Meetings",
+      "How To Take 4 Weeks OFF & Still Hit Your Sales Goals",
+      "\"Whale Bait\" - How to Foster New Agent Relationships",
+      "Utilizing ChatGPT As Your (FREE) Social Media Assistant",
+      "Gwen's Ninja Pre-Approval Checklist",
+      "How To Get Hesitant Buyers Out Shopping",
+      "The 3 Must-Have Email Templates Every LO Needs",
+      "Coach Gwen's \"How-To\" Refi Refresher",
+      "How to Make Your Initial Lead Follow-Up Your Unique Sales Proposition",
+      "Coach Gwen's Facebook Law of Attraction",
+      "The Cold Calling Alternative",
+      "\"Whale Bait\" pt. II",
+      "Pipeline Rescue!"
+    ]
+  },
+  {
+    id: "rr",
+    name: "Coach Rebecca Richardson",
+    initials: "RR",
+    courses: [
+      "Social Made Simple",
+      "How to Work Smarter with AI",
+      "Building The Right Team",
+      "Know Your Avatar: Attract Your Ideal Client",
+      "Stories That Sell with Coach Rebecca",
+      "Staying Human in the A.I. Age w/ Coach Rebecca",
+      "Systems That Save You w/ Coach Rebecca",
+      "Social Media for Introverts",
+      "Repurpose Like a Pro",
+      "Attract Your Ideal Client w/ Coach Rebecca",
+      "Staying Human in the A.I. Age (pt. II)",
+      "\"Systems That Save You\" pt. II"
+    ]
+  },
+  {
+    id: "rw",
+    name: "Coach Ross Woods",
+    initials: "RW",
+    courses: [
+      "Coach Ross's System for Referral Organization",
+      "\"Work Never Fails\" - Coach Ross",
+      "The Importance of Persistence",
+      "Maximizing Business Growth through Efficiency",
+      "Past Clients: Maximizing Referral Business",
+      "Top Producer Panel Discussion (Ross & Kristi)",
+      "Power of Persistence (pt. II)",
+      "Run Your Mortgage Business Like a True Business",
+      "Inspiring Excellence: Leadership Principles for Mortgage Industry Achievement",
+      "Can You Delegate for Better Quality of Life?",
+      "Are You Selling and Marketing YOUR Brand?",
+      "Stop Struggling! Learn Coach Ross's Art of the Sale",
+      "Do You Know Your Numbers?"
+    ]
+  },
+  {
+    id: "do",
+    name: "Dustin Owen (D.O.)",
+    initials: "DO",
+    courses: [
+      "Stop Wasting Weekends: How Top Producers Leverage Open Houses",
+      "The Power of Online Networking: The 30-10-5-5-3-1 Formula",
+      "Originator's Formula for Success",
+      "The Power of One-to-Many: Exponentially Grow Your Business",
+      "How 84 Days Can Generate $1M in Incremental Commissions",
+      "2026 MLO Business Planning w/ DO",
+      "An Unfiltered \"Fireside\" Chat with D.O.",
+      "Ten Scripts You Need to Win in \'26",
+      "The TLOP BLUEPRINT™ Workshop",
+      "The Blueprint™ Quarterly Workshop feat. PJ Crescenzo"
+    ],
+    guest: [
+      "How to Land Production Builders by Becoming Their Turn-Down Lender (Phil Crescenzo)",
+      "Emails So Bada$$ That Realtors Will Call YOU! (Dave Krichmar)",
+      "Email Marketing is NOT Dead! (Dave Krichmar)",
+      "Art of Conscious Communication w/ Jamie Miller",
+      "3 LinkedIn Moves to Fill Your Sales Pipeline (Dan Smokoska)",
+      "The Plan for Success in Today's Origination Market (Tim Braheem)",
+      "Mortgage Lead Generation Secrets",
+      "Unleashing The Power of Video",
+      "How to Make Sure Your Presentations Don't Suck!",
+      "Evolve or Die: How to Survive and Dominate the New Mortgage World",
+      "The Proven Strategies to Skyrocket Your Realtor® Referrals",
+      "Turn Your Social Profiles Into Lead-Generating Machines (Luke Shankula)",
+      "TLOP Realtor Success Series: \"The Plan\" (Sean Shallis)",
+      "3 Ways You Can Win NOW! feat. Todd Duncan",
+      "Become a Better Decision Maker — The Power of...",
+      "3 Sales Techniques You Need to Master",
+      "4 Ways to Earn a Raise in \'25, 1 Question to...",
+      "Two Scripts I Wished I Used More, \"Evidence of Success\" & more",
+      "Stay Top of Mind With Realtors You've Already Met, Sales \"Jedi Mind Tricks\" & more"
+    ]
+  }
+];
+
+function getState() {
+  const s = localStorage.getItem("kj_training");
+  return s ? JSON.parse(s) : {};
+}
+
+function saveState(state) {
+  localStorage.setItem("kj_training", JSON.stringify(state));
+}
+
+function allCourseIds() {
+  const ids = [];
+  COACHES.forEach(c => {
+    c.courses.forEach((_, i) => ids.push(c.id + "_" + i));
+    if (c.guest) c.guest.forEach((_, i) => ids.push(c.id + "_g" + i));
+  });
+  return ids;
+}
+
+function updateGlobalProgress() {
+  const state = getState();
+  const all = allCourseIds();
+  const done = all.filter(id => state[id]).length;
+  const pct = all.length ? Math.round((done / all.length) * 100) : 0;
+  document.getElementById("gp-fill").style.width = pct + "%";
+  document.getElementById("gp-pct").textContent = done + " / " + all.length + " completed";
+}
+
+function toggleCourse(id) {
+  const state = getState();
+  state[id] = !state[id];
+  saveState(state);
+  const card = document.getElementById("card-" + id);
+  if (state[id]) card.classList.add("completed");
+  else card.classList.remove("completed");
+  // Update coach progress
+  const coachId = id.split("_")[0];
+  updateCoachProgress(coachId);
+  updateGlobalProgress();
+}
+
+function updateCoachProgress(coachId) {
+  const state = getState();
+  const coach = COACHES.find(c => c.id === coachId);
+  if (!coach) return;
+  const total = coach.courses.length + (coach.guest ? coach.guest.length : 0);
+  let done = 0;
+  coach.courses.forEach((_, i) => { if (state[coachId + "_" + i]) done++; });
+  if (coach.guest) coach.guest.forEach((_, i) => { if (state[coachId + "_g" + i]) done++; });
+  const el = document.getElementById("cp-" + coachId);
+  if (el) el.textContent = done + " / " + total + " COMPLETED";
+}
+
+function buildCard(title, stateId, state) {
+  const done = state[stateId];
+  return `<div class="course-card${done ? " completed" : ""}" id="card-${stateId}" onclick="toggleCourse('${stateId}')">
+    <div class="course-check"><span class="course-check-mark">✓</span></div>
+    <div class="course-title">${title}</div>
+  </div>`;
+}
+
+function render() {
+  const state = getState();
+  const main = document.getElementById("training-main");
+  let html = "";
+
+  COACHES.forEach(c => {
+    const total = c.courses.length + (c.guest ? c.guest.length : 0);
+    let done = 0;
+    c.courses.forEach((_, i) => { if (state[c.id + "_" + i]) done++; });
+    if (c.guest) c.guest.forEach((_, i) => { if (state[c.id + "_g" + i]) done++; });
+
+    html += `<div class="coach-section">
+      <div class="coach-header">
+        <div class="coach-avatar">${c.initials}</div>
+        <div>
+          <div class="coach-name">${c.name}</div>
+        </div>
+        <div class="coach-count">${total} courses</div>
+        <div class="coach-progress" id="cp-${c.id}">${done} / ${total} COMPLETED</div>
+      </div>
+      <div class="course-grid">
+        ${c.courses.map((title, i) => buildCard(title, c.id + "_" + i, state)).join("")}
+      </div>`;
+
+    if (c.guest && c.guest.length) {
+      html += `<div class="guest-label">Guest & Special Sessions</div>
+        <div class="course-grid">
+          ${c.guest.map((title, i) => buildCard(title, c.id + "_g" + i, state)).join("")}
+        </div>`;
+    }
+
+    html += `</div>`;
+  });
+
+  main.innerHTML = html;
+  updateGlobalProgress();
+}
+
+render();
+</script>
+</body>
+</html>
