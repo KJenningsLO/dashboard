@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kelly Jennings — Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f2f5;
+    --panel: #ffffff;
+    --border: #e2e8f0;
+    --accent: #b8922a;
+    --accent-bright: #d4a843;
+    --accent-bg: rgba(184,146,42,0.07);
+    --accent-border: rgba(184,146,42,0.3);
+    --text: #1a202c;
+    --muted: #64748b;
+    --dim: #cbd5e1;
+    --success: #16a34a;
+    --navy: #1A2E4A;
+    --red: #e53e3e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: "Inter", sans-serif; min-height: 100vh; font-size: 13px; }
+
+  .topbar { background: #fff; border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 200; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .topbar-left { display: flex; align-items: center; gap: 14px; }
+  .logo-box { width: 38px; height: 38px; border: 2px solid var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: "DM Serif Display", serif; font-size: 16px; color: var(--accent); font-weight: 700; }
+  .brand-name { font-weight: 700; font-size: 15px; color: var(--text); line-height: 1.2; }
+  .brand-sub { font-size: 9px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; font-family: "JetBrains Mono", monospace; }
+  .topbar-right { text-align: right; }
+  .topbar-day { font-family: "DM Serif Display", serif; font-size: 20px; color: var(--accent); }
+  .topbar-date { font-size: 9px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; font-family: "JetBrains Mono", monospace; margin-top: 1px; }
+
+  .nav-tabs { background: #fff; border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; }
+  .nav-tab { padding: 13px 18px; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
+  .nav-tab:hover { color: var(--accent); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .layout { display: grid; grid-template-columns: 340px 1fr 320px; gap: 16px; padding: 20px 28px; max-width: 1500px; margin: 0 auto; }
+
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 14px; }
+  .panel-header { padding: 12px 16px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .panel-title { font-size: 9px; font-family: "JetBrains Mono", monospace; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); display: flex; align-items: center; gap: 7px; }
+  .panel-title::before { content: ""; display: inline-block; width: 14px; height: 1.5px; background: var(--accent); }
+  .panel-body { padding: 14px 16px; }
+
+  .progress-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .progress-bar { flex: 1; height: 3px; background: var(--dim); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.3s; }
+
+  .check-item { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; border-bottom: 1px solid #f8f9fa; cursor: pointer; user-select: none; }
+  .check-item:last-child { border-bottom: none; }
+  .check-box { width: 16px; height: 16px; border: 1.5px solid var(--dim); border-radius: 4px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all 0.12s; }
+  .check-item.done .check-box { background: var(--success); border-color: var(--success); }
+  .check-item.done .check-box::after { content: "✓"; color: #fff; font-size: 9px; font-weight: 900; }
+  .check-label { font-size: 12px; color: var(--text); line-height: 1.5; transition: all 0.12s; }
+  .check-item.done .check-label { text-decoration: line-through; color: var(--muted); }
+  .cadence-tag { display: inline-block; background: var(--accent-bg); border: 1px solid var(--accent-border); color: var(--accent); font-size: 9px; font-family: "JetBrains Mono", monospace; font-weight: 600; padding: 1px 6px; border-radius: 4px; margin-left: 4px; letter-spacing: 0.06em; }
+
+  .followup-empty { color: var(--muted); font-size: 12px; padding: 6px 0; }
+
+  .note-item { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 7px 0; border-bottom: 1px solid #f8f9fa; font-size: 12px; }
+  .note-item:last-child { border-bottom: none; }
+  .note-del { color: var(--dim); cursor: pointer; font-size: 16px; line-height: 1; flex-shrink: 0; }
+  .note-del:hover { color: var(--red); }
+  .note-input-row { display: flex; gap: 8px; margin-top: 10px; }
+  .note-input { flex: 1; border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; font-size: 12px; font-family: "Inter", sans-serif; outline: none; color: var(--text); }
+  .note-input:focus { border-color: var(--accent); }
+  .btn-add { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 7px 14px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .btn-add:hover { background: var(--accent-bright); }
+
+  .scratch-textarea { width: 100%; min-height: 160px; border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-size: 12px; font-family: "Inter", sans-serif; resize: vertical; outline: none; color: var(--text); line-height: 1.6; }
+  .scratch-textarea:focus { border-color: var(--accent); }
+  .scratch-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+  .btn-save { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 7px 18px; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .btn-save:hover { background: var(--accent-bright); }
+  .btn-clear { background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 7px 14px; font-size: 12px; font-weight: 500; cursor: pointer; }
+  .btn-clear:hover { border-color: var(--red); color: var(--red); }
+
+  .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .cal-month { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text); }
+  .cal-nav { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 2px 6px; border-radius: 4px; }
+  .cal-nav:hover { color: var(--accent); background: var(--accent-bg); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .cal-dow { font-size: 9px; text-align: center; color: var(--muted); font-weight: 600; letter-spacing: 0.08em; padding-bottom: 6px; }
+  .cal-day { text-align: center; padding: 5px 2px; font-size: 11px; border-radius: 6px; cursor: default; min-height: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .cal-day.other-month { color: var(--dim); }
+  .cal-day.today { background: var(--accent); color: #fff; font-weight: 700; }
+  .cal-day.has-event::after { content: ""; display: block; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); margin: 1px auto 0; }
+  .cal-day.today.has-event::after { background: #fff; }
+  .cal-event-legend { margin-top: 10px; font-size: 10px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .cal-event-legend::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+  .training-cta { border: 1px solid var(--accent-border); border-radius: 10px; overflow: hidden; margin-bottom: 14px; }
+  .training-cta-header { padding: 10px 14px 6px; font-size: 9px; font-family: "JetBrains Mono", monospace; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
+  .training-cta-title { padding: 0 14px 12px; font-family: "DM Serif Display", serif; font-size: 18px; color: var(--text); }
+  .training-cta-btn { display: flex; align-items: center; justify-content: space-between; background: var(--accent); color: #fff; padding: 12px 16px; text-decoration: none; font-size: 13px; font-weight: 600; transition: background 0.15s; }
+  .training-cta-btn:hover { background: var(--accent-bright); }
+  .training-cta-sub { padding: 8px 14px; font-size: 10px; color: var(--muted); text-align: center; border-top: 1px solid var(--border); }
+
+  .quick-links-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ql-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; text-decoration: none; color: var(--text); font-size: 11px; font-weight: 500; transition: all 0.12s; }
+  .ql-item:hover { border-color: var(--accent-border); background: var(--accent-bg); }
+  .ql-icon { font-size: 14px; flex-shrink: 0; }
+
+  .blueprint-bar { background: var(--navy); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .blueprint-bar-title { font-size: 11px; font-family: "JetBrains Mono", monospace; color: rgba(255,255,255,0.7); letter-spacing: 0.1em; text-transform: uppercase; }
+  .blueprint-bar-actions { display: flex; gap: 8px; }
+  .blueprint-bar-btn { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 5px; font-size: 11px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+  .blueprint-bar-btn:hover { background: rgba(255,255,255,0.22); }
+  .blueprint-iframe { width: 100%; height: 680px; border: none; display: block; }
+
+  .realtors-layout { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; padding: 20px 28px; max-width: 1500px; margin: 0 auto; }
+  .cadence-group-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .cadence-group-header { background: var(--navy); color: #fff; padding: 12px 16px; font-size: 10px; font-family: "JetBrains Mono", monospace; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+  .cadence-row { display: flex; align-items: flex-start; gap: 10px; padding: 9px 16px; border-bottom: 1px solid #f8f9fa; }
+  .cadence-row:last-child { border-bottom: none; }
+  .cadence-wk { font-size: 9px; font-family: "JetBrains Mono", monospace; color: var(--muted); width: 36px; flex-shrink: 0; margin-top: 1px; }
+  .cadence-action { font-size: 12px; }
+  .cadence-action b { color: var(--accent); }
+
+  .placeholder-panel { padding: 60px 28px; text-align: center; color: var(--muted); }
+  .placeholder-panel h2 { font-family: "DM Serif Display", serif; font-size: 24px; color: var(--text); margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo-box">KJ</div>
+    <div>
+      <div class="brand-name">Kelly Jennings Home Loans</div>
+      <div class="brand-sub">Command Center · NMLS 2003818</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-day" id="hdr-day"></div>
+    <div class="topbar-date" id="hdr-date"></div>
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <div class="nav-tab active" data-tab="today">Today</div>
+  <div class="nav-tab" data-tab="pipeline">Pipeline</div>
+  <div class="nav-tab" data-tab="realtors">Realtors</div>
+  <div class="nav-tab" data-tab="pastclients">Past Clients</div>
+  <div class="nav-tab" data-tab="calendar">Calendar</div>
+</div>
+
+<!-- TODAY -->
+<div class="tab-panel active" id="tab-today">
+  <div class="layout">
+    <div>
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Blueprint Non-Negotiables</span>
+          <span id="nn-count" style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);">0/0</span>
+        </div>
+        <div class="panel-body" style="padding-bottom:6px;">
+          <div class="progress-row"><div class="progress-bar"><div class="progress-fill" id="nn-progress" style="width:0%"></div></div></div>
+          <div id="nn-list"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Notes</span></div>
+        <div class="panel-body">
+          <div id="notes-list"><div class="followup-empty">No notes yet.</div></div>
+          <div class="note-input-row">
+            <input class="note-input" id="note-input" type="text" placeholder="Add a note...">
+            <button class="btn-add" onclick="addNote()">+ Add</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Follow-Ups Due Today</span></div>
+        <div class="panel-body"><div class="followup-empty">No follow-ups scheduled for this date.</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Comments &amp; DMs</span></div>
+        <div class="panel-body">
+          <textarea class="scratch-textarea" id="scratch-pad" placeholder="Paste your comments and DMs here for today's outreach..."></textarea>
+          <div class="scratch-actions">
+            <button class="btn-clear" onclick="clearScratch()">Clear</button>
+            <button class="btn-save" onclick="saveScratch()">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Monthly Calendar</span></div>
+        <div class="panel-body">
+          <div class="cal-header">
+            <button class="cal-nav" onclick="calPrev()">‹</button>
+            <span class="cal-month" id="cal-month-label"></span>
+            <button class="cal-nav" onclick="calNext()">›</button>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+          <div class="cal-event-legend">EVENT</div>
+        </div>
+      </div>
+      <div class="training-cta">
+        <div class="training-cta-header">Training Center</div>
+        <div class="training-cta-title">TLOP Coaching Library</div>
+        <a href="training.html" class="training-cta-btn"><span>View My Courses</span><span>→</span></a>
+        <div class="training-cta-sub">5 coaches · 107 courses · progress saved</div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Quick Links</span></div>
+        <div class="panel-body">
+          <div class="quick-links-grid">
+            <a href="https://www.canva.com" target="_blank" class="ql-item"><span class="ql-icon">🎨</span>Canva</a>
+            <a href="#" class="ql-item"><span class="ql-icon">🔗</span>Model Match</a>
+            <a href="#" class="ql-item"><span class="ql-icon">✨</span>Mortgage Coach</a>
+            <a href="https://kellyjenningshomeloan.com" target="_blank" class="ql-item"><span class="ql-icon">🏠</span>My Website</a>
+            <a href="https://gamma.app" target="_blank" class="ql-item"><span class="ql-icon">⚡</span>Gamma</a>
+            <a href="https://www.linkedin.com" target="_blank" class="ql-item"><span class="ql-icon">💼</span>LinkedIn</a>
+            <a href="https://business.google.com" target="_blank" class="ql-item"><span class="ql-icon">📍</span>GMB</a>
+            <a href="https://studio.youtube.com" target="_blank" class="ql-item"><span class="ql-icon">▶️</span>YouTube</a>
+            <a href="blueprint_2026.pdf" target="_blank" class="ql-item"><span class="ql-icon">📋</span>Blueprint PDF</a>
+            <a href="https://license.ncrec.gov" target="_blank" class="ql-item"><span class="ql-icon">🔍</span>NCREC Lookup</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PIPELINE -->
+<div class="tab-panel" id="tab-pipeline">
+  <div class="placeholder-panel"><h2>Pipeline</h2><p>Active loan pipeline tracking — coming soon.</p></div>
+</div>
+
+<!-- REALTORS -->
+<div class="tab-panel" id="tab-realtors">
+  <div style="padding:20px 28px 10px;">
+    <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:4px;">Realtor Cadence</div>
+    <div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);letter-spacing:0.1em;">250 REALTORS · 12-WEEK PERPETUAL CYCLE · TUE / WED / THU</div>
+  </div>
+  <div class="realtors-layout">
+    <div class="cadence-group-card">
+      <div class="cadence-group-header">Group A — Realtors 1–84</div>
+      <div class="cadence-row"><span class="cadence-wk">Wk 1–2</span><div class="cadence-action"><b>FB DM</b> · 14/day · Realtors 1–84</div></div>
+      <div class="cadence-row"><span class="cadence-wk">Wk 3–4</span><div class="cadence-action"><b>FB Comment</b> · 14/day · Realtors 1–84</div></div>
+      <div class="cadence-row"><span class="cadence-wk">Wk 5–6</span><div class="cadence-action"><b>IG Comment</b> · 14/day · Realtors 1–84</div></div>
+      <div class="cadence-row"><span class="cadence-wk">Wk 7–8</span><div class="cadence-action"><b>IG DM</b> · 14/day · Realtors 1–84</div></div>
+      <div class="cadence-row"><span class="cadence-wk">Wk 9–10</span><div class="cadence-action"><b>FB Comment</b> · 14/day · Realtors 1–84</div></div>
+      <div class="cadence-row"><span class="cadence-wk">Wk 11–12</span><div class="cadence-action"><b>IG Comment</b> · 14/day · Realtors 1–84</div></div>
+    </div>
+    <div class="cadence-group-card">
+      <div class="cadence-group-header">Group B — Realtors 85–170</div>
+      <div class="cadence-row"><span class="cadence-wk">Wk 1–2</span><div class="cadence-action"><b>FB Comment</b> · 14/day · Realtors 85–170</div></div>
+      <div class="cadence-row"><span class="cadence-wk">Wk 3–4</span><div class="cadence-action"><b>IG Comment</b> · 14/day · Realtors 85–170</div></div>
+      <div class="cadence-row"><span class="cadence-wk">Wk 5–6</span><div class="cadence-action"><b>FB DM</b> · 14/day · Realtors 85–170</div></div>
+      <div class="cadence-row"><span class="cadence-wk">Wk 7–8</span><div class="cadence-action"><b>FB Comment</b> · 14/day · Realtors 85–170</div></div>
+      <div class="cadence-row"><span class="cadence-wk">Wk 9–10</span><div class="cadence-action"><b>IG Comment</b> · 14/day · Realtors 85–170</div></div>
+      <div class="cadence-row"><span class="cadence-wk">Wk 11–12</span><div class="cadence-action"><b>IG DM</b> · 14/day · Realtors 85–170</div></div>
+    </div>
+    <div class="cadence-group-card">
+      <div class="cadence-group-header">Group C — Realtors 171–250</div>
+      <div class="cadence-row"><span class="cadence-wk">Wk 1–2</span><div class="cadence-action"><b>IG Comment</b> · 14/day · Realtors 171–250</div></div>
+      <div class="cadence-row"><span class="cadence-wk">Wk 3–4</span><div class="cadence-action"><b>FB DM</b> · 14/day · Realtors 171–250</div></div>
+      <div class="cadence-row"><span class="cadence-wk">Wk 5–6</span><div class="cadence-action"><b>FB Comment</b> · 14/day · Realtors 171–250</div></div>
+      <div class="cadence-row"><span class="cadence-wk">Wk 7–8</span><div class="cadence-action"><b>IG Comment</b> · 14/day · Realtors 171–250</div></div>
+      <div class="cadence-row"><span class="cadence-wk">Wk 9–10</span><div class="cadence-action"><b>IG DM</b> · 14/day · Realtors 171–250</div></div>
+      <div class="cadence-row"><span class="cadence-wk">Wk 11–12</span><div class="cadence-action"><b>FB Comment</b> · 14/day · Realtors 171–250</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAST CLIENTS -->
+<div class="tab-panel" id="tab-pastclients">
+  <div class="placeholder-panel"><h2>Past Clients</h2><p>Past client database and follow-up system — coming soon.</p></div>
+</div>
+
+<!-- CALENDAR / BLUEPRINT -->
+<div class="tab-panel" id="tab-calendar">
+  <div style="padding:20px 28px;">
+    <div class="panel" style="margin-bottom:0;">
+      <div class="blueprint-bar">
+        <span class="blueprint-bar-title">📋 Blueprint 2026 — Full Calendar</span>
+        <div class="blueprint-bar-actions">
+          <a href="blueprint_2026.pdf" target="_blank" class="blueprint-bar-btn">⬆ Full Screen</a>
+          <a href="blueprint_2026.pdf" download class="blueprint-bar-btn">⬇ Download</a>
+        </div>
+      </div>
+      <iframe class="blueprint-iframe" src="blueprint_2026.pdf" title="Blueprint 2026"></iframe>
+    </div>
+  </div>
+</div>
+
+<script>
+// DATE
+const NOW = new Date();
+const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+document.getElementById("hdr-day").textContent = DAYS[NOW.getDay()];
+document.getElementById("hdr-date").textContent = MONTHS[NOW.getMonth()] + " " + NOW.getDate() + ", " + NOW.getFullYear();
+
+// TABS
+document.querySelectorAll(".nav-tab").forEach(t => t.addEventListener("click", () => {
+  document.querySelectorAll(".nav-tab").forEach(x => x.classList.remove("active"));
+  document.querySelectorAll(".tab-panel").forEach(x => x.classList.remove("active"));
+  t.classList.add("active");
+  document.getElementById("tab-" + t.dataset.tab).classList.add("active");
+}));
+
+// CADENCE
+const CADENCE_START = new Date("2026-04-28T00:00:00");
+const C12 = [
+  ["FB DM","1-14","FB Comment","85-98","IG Comment","171-184"],
+  ["FB DM","15-28","FB Comment","99-112","IG Comment","185-198"],
+  ["FB DM","29-42","FB Comment","113-126","IG Comment","199-212"],
+  ["FB DM","43-56","FB Comment","127-140","IG Comment","213-226"],
+  ["FB DM","57-70","FB Comment","141-154","IG Comment","227-240"],
+  ["FB DM","71-84","FB Comment","155-168","IG Comment","241-250"],
+  ["FB Comment","1-14","IG Comment","85-98","FB DM","171-184"],
+  ["FB Comment","15-28","IG Comment","99-112","FB DM","185-198"],
+  ["FB Comment","29-42","IG Comment","113-126","FB DM","199-212"],
+  ["FB Comment","43-56","IG Comment","127-140","FB DM","213-226"],
+  ["FB Comment","57-70","IG Comment","141-154","FB DM","227-240"],
+  ["FB Comment","71-84","IG Comment","155-168","FB DM","241-250"],
+  ["IG Comment","1-14","FB DM","85-98","FB Comment","171-184"],
+  ["IG Comment","15-28","FB DM","99-112","FB Comment","185-198"],
+  ["IG Comment","29-42","FB DM","113-126","FB Comment","199-212"],
+  ["IG Comment","43-56","FB DM","127-140","FB Comment","213-226"],
+  ["IG Comment","57-70","FB DM","141-154","FB Comment","227-240"],
+  ["IG Comment","71-84","FB DM","155-168","FB Comment","241-250"],
+  ["IG DM","1-14","FB Comment","85-98","IG Comment","171-184"],
+  ["IG DM","15-28","FB Comment","99-112","IG Comment","185-198"],
+  ["IG DM","29-42","FB Comment","113-126","IG Comment","199-212"],
+  ["IG DM","43-56","FB Comment","127-140","IG Comment","213-226"],
+  ["IG DM","57-70","FB Comment","141-154","IG Comment","227-240"],
+  ["IG DM","71-84","FB Comment","155-168","IG Comment","241-250"],
+  ["FB Comment","1-14","IG Comment","85-98","IG DM","171-184"],
+  ["FB Comment","15-28","IG Comment","99-112","IG DM","185-198"],
+  ["FB Comment","29-42","IG Comment","113-126","IG DM","199-212"],
+  ["FB Comment","43-56","IG Comment","127-140","IG DM","213-226"],
+  ["FB Comment","57-70","IG Comment","141-154","IG DM","227-240"],
+  ["FB Comment","71-84","IG Comment","155-168","IG DM","241-250"],
+  ["IG Comment","1-14","IG DM","85-98","FB Comment","171-184"],
+  ["IG Comment","15-28","IG DM","99-112","FB Comment","185-198"],
+  ["IG Comment","29-42","IG DM","113-126","FB Comment","199-212"],
+  ["IG Comment","43-56","IG DM","127-140","FB Comment","213-226"],
+  ["IG Comment","57-70","IG DM","141-154","FB Comment","227-240"],
+  ["IG Comment","71-84","IG DM","155-168","FB Comment","241-250"],
+];
+
+function getCadenceIdx(d) {
+  const dow = d.getDay();
+  if (![2,3,4].includes(dow)) return null;
+  let count = 0, cur = new Date(CADENCE_START);
+  cur.setHours(0,0,0,0);
+  const tgt = new Date(d); tgt.setHours(0,0,0,0);
+  if (tgt < cur) return null;
+  while (true) {
+    if ([2,3,4].includes(cur.getDay())) {
+      if (cur.getTime()===tgt.getTime()) return count;
+      count++;
+    }
+    cur.setDate(cur.getDate()+1);
+    if (cur>tgt) break;
+  }
+  return null;
+}
+
+// NON-NEGOTIABLES
+const CORE = {
+  1:["Birthday DMs — Mon + Tue birthdays","Post Content: FB + IG","TikTok (same as FB/IG)","New Applications — work pipeline","Work Movoto Leads","Follow-ups: Prospective Clients","Add: 5 LinkedIn + 3 FB + 3 IG","GMB Content"],
+  2:["Birthday DMs — next day's birthdays","Post Content: FB + IG","LinkedIn FA Post (2 of 3)","LinkedIn DMs — 5 Financial Advisors","LinkedIn — Comment on 5 FA Posts","Batch Video Filming — 1 video","CRM — Add 5 realtors + model match"],
+  3:["Birthday DMs — next day's birthdays","Post Content: FB + IG","TikTok (same as FB/IG)","FB Group — 2 comments in group","Work Movoto Leads","Add: 5 LinkedIn + 3 FB + 3 IG","GMB Content"],
+  4:["Birthday DMs — next day's birthdays","Post Content: FB + IG","LinkedIn FA Post (3 of 3)","LinkedIn DMs — 5 Financial Advisors","Follow-ups: Prospective Clients","Work Movoto Leads","Edit Video Content (from Tue filming)","Batch 5 Canva Posts"],
+  5:["Birthday DMs — Sat + Sun birthdays","Post Content: FB + IG","TikTok (same as FB/IG)","Post YouTube Video","TikTok (YouTube video copy)","Post to LinkedIn","Send Reels to Realtors","Text under-contract clients","GMB Content"],
+};
+
+function getNNState() { const r=localStorage.getItem("nn_"+NOW.toDateString()); return r?JSON.parse(r):{}; }
+function saveNNState(s) { localStorage.setItem("nn_"+NOW.toDateString(),JSON.stringify(s)); }
+
+function renderNN() {
+  const dow = NOW.getDay();
+  const state = getNNState();
+  const tasks = CORE[dow]||[];
+  let all = [...tasks];
+  if ([2,3,4].includes(dow)) {
+    const idx = getCadenceIdx(NOW);
+    if (idx!==null) {
+      const row = C12[idx%C12.length];
+      all.push("__c__"+row[0]+": "+row[1]);
+      all.push("__c__"+row[2]+": "+row[3]);
+      all.push("__c__"+row[4]+": "+row[5]);
+    }
+  }
+  if (!all.length) {
+    document.getElementById("nn-list").innerHTML='<div class="followup-empty">No tasks today — weekend.</div>';
+    document.getElementById("nn-count").textContent="0/0";
+    return;
+  }
+  const done = all.filter(t=>state[t]).length;
+  document.getElementById("nn-count").textContent=done+"/"+all.length;
+  document.getElementById("nn-progress").style.width=Math.round((done/all.length)*100)+"%";
+  document.getElementById("nn-list").innerHTML=all.map(t=>{
+    const isc=t.startsWith("__c__");
+    const label=isc?t.replace("__c__",""):t;
+    const isDone=!!state[t];
+    const key=t.replace(/'/g,"\\'");
+    return `<div class="check-item${isDone?" done":""}" onclick="toggleNN('${key}')"><div class="check-box"></div><div class="check-label">${label}${isc?'<span class="cadence-tag">CADENCE</span>':''}</div></div>`;
+  }).join("");
+}
+
+function toggleNN(id) {
+  const s=getNNState(); s[id]=!s[id]; saveNNState(s); renderNN();
+}
+renderNN();
+
+// NOTES
+function getNotes(){const r=localStorage.getItem("kj_notes");return r?JSON.parse(r):[];}
+function saveNotes(n){localStorage.setItem("kj_notes",JSON.stringify(n));}
+function renderNotes(){
+  const notes=getNotes();
+  document.getElementById("notes-list").innerHTML=notes.length
+    ?notes.map((n,i)=>`<div class="note-item"><span>${n}</span><span class="note-del" onclick="deleteNote(${i})">×</span></div>`).join("")
+    :'<div class="followup-empty">No notes yet.</div>';
+}
+function addNote(){
+  const inp=document.getElementById("note-input");
+  const v=inp.value.trim(); if(!v)return;
+  const n=getNotes(); n.unshift(v); saveNotes(n); inp.value=""; renderNotes();
+}
+function deleteNote(i){const n=getNotes();n.splice(i,1);saveNotes(n);renderNotes();}
+document.getElementById("note-input").addEventListener("keydown",e=>{if(e.key==="Enter")addNote();});
+renderNotes();
+
+// SCRATCH PAD
+const SK="kj_scratch_"+NOW.toDateString();
+const SE=document.getElementById("scratch-pad");
+const sv=localStorage.getItem(SK); if(sv)SE.value=sv;
+function saveScratch(){localStorage.setItem(SK,SE.value);}
+function clearScratch(){SE.value="";localStorage.removeItem(SK);}
+
+// CALENDAR
+let cY=NOW.getFullYear(),cM=NOW.getMonth();
+function hasCadenceEvent(y,m,d){
+  const dt=new Date(y,m,d);
+  return [2,3,4].includes(dt.getDay())&&dt>=CADENCE_START;
+}
+function renderCal(){
+  document.getElementById("cal-month-label").textContent=MONTHS[cM]+" "+cY;
+  const fd=new Date(cY,cM,1).getDay();
+  const dim=new Date(cY,cM+1,0).getDate();
+  const pd=new Date(cY,cM,0).getDate();
+  let h=["S","M","T","W","T","F","S"].map(d=>`<div class="cal-dow">${d}</div>`).join("");
+  for(let i=fd-1;i>=0;i--)h+=`<div class="cal-day other-month">${pd-i}</div>`;
+  for(let d=1;d<=dim;d++){
+    const isT=(d===NOW.getDate()&&cM===NOW.getMonth()&&cY===NOW.getFullYear());
+    const hasE=hasCadenceEvent(cY,cM,d);
+    h+=`<div class="cal-day${isT?" today":""}${hasE?" has-event":""}">${d}</div>`;
+  }
+  const rem=(fd+dim)%7===0?0:7-(fd+dim)%7;
+  for(let d=1;d<=rem;d++)h+=`<div class="cal-day other-month">${d}</div>`;
+  document.getElementById("cal-grid").innerHTML=h;
+}
+function calPrev(){cM--;if(cM<0){cM=11;cY--;}renderCal();}
+function calNext(){cM++;if(cM>11){cM=0;cY++;}renderCal();}
+renderCal();
+</script>
+</body>
+</html>
